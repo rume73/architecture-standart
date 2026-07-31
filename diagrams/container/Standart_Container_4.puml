@@ -1,0 +1,51 @@
+@startuml
+title Bank Standard - Container Diagram (C4 Level 2)
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(backOffice, "Deposit Back Office Specialist", "Updates deposit rates")
+Person(operator, "Call Center Operator", "Consults clients")
+Person(partnerOperator, "Partner Call Center Operator", "Uses received files")
+
+System_Boundary(rateSystem, "Deposit Rate Management System") {
+
+Container(rateAPI, "Rate API", "Java Spring Boot", "Provides rates for internal systems")
+
+Container(rateService, "Rate Service", "Java Spring Boot", "Business logic for rate management")
+
+Container(rateDB, "Rate Database", "MS SQL", "Stores current rates and history")
+
+Container(fileGenerator, "Rate File Generator", "Java", "Generates files for partner call center")
+
+Container(fileStorage, "File Storage", "File System", "Stores generated rate files")
+}
+
+System_Ext(excel, "Excel Files", "Current deposit rates source")
+
+System_Ext(callCenter, "Bank Call Center System", "Java Spring Boot + PostgreSQL")
+
+System_Ext(partnerCC, "Partner Call Center System", "External system")
+
+Rel(backOffice, excel, "Updates")
+
+Rel(excel, rateService, "Imports rates")
+
+Rel(rateService, rateDB, "Reads/Writes")
+
+Rel(callCenter, rateAPI, "REST API")
+
+Rel(rateAPI, rateService, "Requests rates")
+
+Rel(rateService, fileGenerator, "Creates files")
+
+Rel(fileGenerator, fileStorage, "Stores files")
+
+Rel(fileStorage, partnerCC, "File transfer")
+
+Rel(operator, callCenter, "Uses")
+
+Rel(partnerOperator, partnerCC, "Uses")
+
+@enduml

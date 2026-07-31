@@ -1,0 +1,34 @@
+@startuml
+title Bank Standard - Context Diagram (C4 Level 1)
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+Person(client, "Client", "Receives deposit information")
+Person(operator, "Call Center Operator", "Consults clients about deposit rates")
+Person(partnerOperator, "Partner Call Center Operator", "Consults clients using provided files")
+Person(backOffice, "Deposit Back Office Specialist", "Creates and updates deposit rates")
+
+System(bank, "Bank Standard", "Bank digital systems")
+
+System_Ext(callCenter, "Bank Call Center System", "Customer service platform")
+System_Ext(partnerCC, "Partner Call Center System", "External customer service platform")
+System_Ext(excel, "Excel Files", "Current deposit rates source")
+
+System(rateSystem, "Deposit Rate Management System", "Centralized service for managing and distributing deposit rates")
+
+Rel(backOffice, excel, "Updates rates")
+Rel(excel, rateSystem, "Imports rates")
+
+Rel(rateSystem, callCenter, "Provides current rates via REST API")
+Rel(callCenter, operator, "Shows rates")
+
+Rel(rateSystem, partnerCC, "Provides rates as files")
+
+Rel(operator, client, "Consults")
+Rel(partnerOperator, client, "Consults")
+
+Rel(client, bank, "Requests deposit information")
+
+@enduml
