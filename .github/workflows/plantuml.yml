@@ -38,10 +38,21 @@ jobs:
       run: |
         wget -q https://github.com/plantuml/plantuml/releases/download/v1.2024.8/plantuml-1.2024.8.jar -O plantuml.jar
 
-    - name: Generate Diagrams
+    - name: Generate Context Diagrams
       run: |
-        java -jar plantuml.jar -tpng /diagrams/context/*.puml || true
-        java -jar plantuml.jar -tpng /diagrams/container/*.puml || true
+        if [ -d "diagrams/context" ]; then
+          java -jar plantuml.jar -tpng diagrams/context/*.puml || true
+        else
+          echo "diagrams/context directory not found"
+        fi
+
+    - name: Generate Container Diagrams
+      run: |
+        if [ -d "diagrams/container" ]; then
+          java -jar plantuml.jar -tpng diagrams/container/*.puml || true
+        else
+          echo "diagrams/container directory not found"
+        fi
 
     - name: Commit Diagrams
       run: |
