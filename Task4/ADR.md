@@ -154,11 +154,11 @@ XLS используется только как источник загрузк
 
 ---
 
-![Диаграмма контекста в модели С4](https://github.com/rume73/architecture-warmhouse/blob/standart/diagrams/context/Standart_Context_4.png?raw=true)
+![Диаграмма контекста в модели С4](https://github.com/rume73/architecture-standart/blob/standart/diagrams/context/Standart_Context_4.png?raw=true)
 
 ---
 
-![Диаграмма компонентов в модели С4](https://github.com/rume73/architecture-warmhouse/blob/standart/diagrams/container/Standart_Container_4.png?raw=true)
+![Диаграмма компонентов в модели С4](https://github.com/rume73/architecture-standart/blob/standart/diagrams/container/Standart_Container_4.png?raw=true)
 
 ---
 
