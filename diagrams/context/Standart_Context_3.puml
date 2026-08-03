@@ -1,0 +1,86 @@
+@startuml
+title Bank Standard - Container Diagram (C4 Level 2)
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(client, "Client", "Views deposits\nSubmits applications online")
+Person(operator, "Call Center Operator", "Processes applications")
+Person(backDeposit, "Back Office Specialist (Deposits)", "Confirms terms")
+
+System_Boundary(onlineChannels, "Online Channels") {
+    Container(SiteFrontend, "Website (Frontend)", "React.js", "Marketing portal\nApplication form")
+    Container(SiteBackend, "Website (Backend)", "PHP", "Form processing\nSends applications to service")
+
+    Container(IBFrontend, "Internet Bank (Frontend)", "ASP.NET MVC", "Client interface\nView rates\nSubmit applications")
+    Container(IBBackend, "Internet Bank (Backend)", "ASP.NET MVC", "Business logic\nIntegration with application service")
+    Container(IBDB, "Internet Bank Database", "MS SQL", "Client data\nTransaction history")
+    Container(IBRedis, "Internet Bank Cache (NEW)", "Redis", "Reference data caching\nRates")
+}
+
+System_Boundary(depositService, "Deposit Application Service (NEW)") {
+    Container(APIGateway, "API Gateway / BFF", "Java Spring Boot", "Single entry point\nData aggregation\nRouting")
+    Container(ApplicationService, "Application Service", "Java Spring Boot", "Business logic\nStatus management\nValidation")
+    Container(DepositDB, "Application Database", "MS SQL", "Application storage\nStatuses\nHistory")
+    Container(Kafka, "Message Queue (NEW)", "Kafka", "Async transfer\nABS offloading")
+}
+
+System_Boundary(callCenter, "Call Center System") {
+    Container(CCFrontend, "Call Center (Frontend)", "React.js", "Operator interface\nView applications")
+    Container(CCBackend, "Call Center (Backend)", "Java Spring Boot", "Inquiry processing\nMicroservice")
+    Container(CCDB, "Call Center Database", "PostgreSQL", "Client inquiries\nCall history")
+}
+
+System_Boundary(absSystem, "ABS (Core Banking System)") {
+    Container(ABSClient, "ABS (Desktop Client)", "Delphi", "Employee interface\nBranch operations")
+    Container(ABSPL, "ABS Business Logic", "PL-SQL", "Deposit opening procedures\nRate calculation")
+    Container(ABSOracle, "ABS Database", "Oracle", "All accounts and transactions\nAccounting")
+}
+
+System_Ext(SMSGateway, "SMS Gateway", "External operator\nSends SMS")
+System_Ext(Excel, "Excel Files (TEMPORARY)", "Manual rate calculation\nMVP")
+
+' Client
+Rel(client, SiteFrontend, "Submits application")
+Rel(client, IBFrontend, "Submits application")
+
+' Website
+Rel(SiteFrontend, SiteBackend, "Sends application")
+Rel(SiteBackend, APIGateway, "REST API")
+
+' Internet Bank
+Rel(IBFrontend, IBBackend, "Requests data")
+Rel(IBBackend, IBRedis, "Caches reference data")
+Rel(IBBackend, IBDB, "Reads/Writes")
+Rel(IBBackend, APIGateway, "REST API")
+Rel(IBBackend, SMSGateway, "Sends SMS code")
+
+' Deposit Application Service
+Rel(APIGateway, ApplicationService, "Sends application")
+Rel(ApplicationService, DepositDB, "Reads/Writes")
+Rel(ApplicationService, Kafka, "Sends to queue")
+
+' ABS
+Rel(Kafka, ABSOracle, "Async application reading")
+Rel(ABSClient, ABSPL, "Calls procedures")
+Rel(ABSPL, ABSOracle, "Reads/Writes")
+
+' Call Center
+Rel(CCFrontend, CCBackend, "Requests data")
+Rel(CCBackend, CCDB, "Reads/Writes")
+Rel(CCBackend, APIGateway, "REST API\nView applications")
+
+' SMS
+Rel(ABSOracle, SMSGateway, "SMS command")
+Rel(SMSGateway, client, "SMS notifications")
+
+' Temporary manual processes (MVP)
+Rel(ApplicationService, Excel, "Temporary rate calculation")
+Rel(backDeposit, ABSClient, "Confirms deposit")
+
+' Operator
+Rel(operator, CCFrontend, "Works")
+Rel(backDeposit, ABSClient, "Confirms deposit")
+
+@enduml
